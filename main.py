@@ -49,7 +49,7 @@ async def on_message(message):
                             print(channel)
                             for c in os.listdir('./content/' + b):
                                 await channel.send(file=discord.File('./content/' + b + '/' + c))
-        elif message.author.id in [548571901916610560, 301489793714618368] and message.channel.name in loadedjsonsettings['channels']:
+        elif message.author.id in [548571901916610560, 301489793714618368] and message.channel.name in os.listdir('./content'):
             print(message.attachments)
             print(message.attachments[0].url)
             #saves file
