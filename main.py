@@ -2,6 +2,7 @@
 import json
 import os
 import requests
+import gc
 from datetime import date
 import discord as discord
 
@@ -28,6 +29,7 @@ async def on_message(message):
                                     savedFile.write(fileDat.content)
                                     savedFile.close
                     await message.channel.send('done creating archive')
+                    gc.collect()
                 else: await message.channel.send('already in archive')  
             #Rebuilds all files
             elif content.split(' ')[0] == 'rebuild':
@@ -49,6 +51,7 @@ async def on_message(message):
                             print(channel)
                             for c in os.listdir('./content/' + b):
                                 await channel.send(file=discord.File('./content/' + b + '/' + c))
+                gc.collect()
         elif message.author.id in [548571901916610560, 301489793714618368] and message.channel.name in os.listdir('./content'):
             print(message.attachments)
             print(message.attachments[0].url)
@@ -60,5 +63,6 @@ async def on_message(message):
                     with open(filename, 'wb') as savedFile:
                         savedFile.write(fileDat.content)
                         savedFile.close
+            gc.collect()
 
 client.run(open('./token.txt', 'r').read())
