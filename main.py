@@ -13,14 +13,27 @@ with open('channels.json', 'r') as jsonFile:
 
 @client.event
 async def on_message(message):
+    print(message)
     if message.author.bot == False:
-        if message.content[0:2] == 'h ':
+        if message.content[0:2] == 'h ' and  message.author.id in [548571901916610560, 301489793714618368]:
             content = message.content[2:]
             #Adds new channel to archive
             if content.split(' ')[0] == 'add':
                 print('kek lmao')
                 if not os.path.isdir('./contents/' + message.channel.name):
                     os.mkdir('./content/' + message.channel.name)
+                    await message.channel.send('creating archive and adding past posts')
+                    for a in (await message.channel.history().flatten()):
+                        print(a.attachments)
+                        if a.attachments != []:
+                            for b in a.attachments:
+                                fileDat = requests.get(b.url)
+                                filename = './content/' + message.channel.name + '/' + (date.today().strftime("%Y-%m-%d-%H-%M-%S") if os.path.isfile(b.filename) else b.filename)
+                                with open(filename, 'wb') as savedFile:
+                                    savedFile.write(fileDat.content)
+                                    savedFile.close
+                    await message.channel.send('done creating archive')
+                else: await message.channel.send('already in archive')  
             #Rebuilds all files
             elif content.split(' ')[0] == 'rebuild':
                 #Checks if category exists and if it doesn't creates it
@@ -34,16 +47,20 @@ async def on_message(message):
                     print(a)
                     if a.name == 'Heubretuniantian archives':
                         for b in os.listdir('content'):
-                            await message.guild.create_text_channel(b, category=a, nsfw=True)
-        elif message.author.id in [548571901916610560] and message.channel.name in loadedjsonsettings['channels']:
+                            channel = await message.guild.create_text_channel(b, category=a, nsfw=True)
+                            print(channel)
+                            for c in os.listdir('./content/' + b):
+                                await channel.send(file=discord.File('./content/' + b + '/' + c))
+        elif message.author.id in [548571901916610560, 301489793714618368] and message.channel.name in loadedjsonsettings['channels']:
             print(message.attachments)
             print(message.attachments[0].url)
             #saves file
             for a in message.attachments:
-                fileDat = requests.get(a.url)
-                filename = './content/' + message.channel.name + '/' + (date.today().strftime("%Y-%m-%d-%H-%M-%S") if os.path.isfile(a.filename) else a.filename)
-                with open(filename, 'wb') as savedFile:
-                    savedFile.write(fileDat.content)
-                    savedFile.close
+                if a != []:
+                    fileDat = requests.get(a.url)
+                    filename = './content/' + message.channel.name + '/' + (date.today().strftime("%Y-%m-%d-%H-%M-%S") if os.path.isfile(a.filename) else a.filename)
+                    with open(filename, 'wb') as savedFile:
+                        savedFile.write(fileDat.content)
+                        savedFile.close
 
 client.run(open('./token.txt', 'r').read())
