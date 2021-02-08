@@ -7,10 +7,6 @@ import discord as discord
 
 client = discord.Client()
 
-with open('channels.json', 'r') as jsonFile:
-    loadedjsonsettings = json.load(jsonFile)
-    jsonFile.close()
-
 @client.event
 async def on_message(message):
     print(message)
@@ -19,8 +15,7 @@ async def on_message(message):
             content = message.content[2:]
             #Adds new channel to archive
             if content.split(' ')[0] == 'add':
-                print('kek lmao')
-                if not os.path.isdir('./contents/' + message.channel.name):
+                if not os.path.isdir('./content/' + message.channel.name):
                     os.mkdir('./content/' + message.channel.name)
                     await message.channel.send('creating archive and adding past posts')
                     for a in (await message.channel.history().flatten()):
@@ -41,13 +36,16 @@ async def on_message(message):
                     if a.name == 'Heubretuniantian archives': exists=True
                     else: exists=False
                 if exists == False:
-                    await message.guild.create_category('Heubretuniantian archives')
+                    category = await message.guild.create_category('Heubretuniantian archives')
                 #Puts all files in the category if it is the category
                 for a in message.guild.categories:
                     print(a)
                     if a.name == 'Heubretuniantian archives':
                         for b in os.listdir('content'):
-                            channel = await message.guild.create_text_channel(b, category=a, nsfw=True)
+                            for a in category.channels:
+                                if a.name in os.listdir('./content/'):
+                                    channel = await message.guild.create_text_channel(b, category=a, nsfw=True)
+                                else: pass
                             print(channel)
                             for c in os.listdir('./content/' + b):
                                 await channel.send(file=discord.File('./content/' + b + '/' + c))
