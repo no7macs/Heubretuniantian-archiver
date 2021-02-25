@@ -44,10 +44,7 @@ async def on_message(message):
                     print(a)
                     if a.name == 'Heubretuniantian archives':
                         for b in os.listdir('content'):
-                            for a in category.channels:
-                                if a.name in os.listdir('./content/'):
-                                    channel = await message.guild.create_text_channel(b, category=a, nsfw=True)
-                                else: pass
+                            channel = await message.guild.create_text_channel(b, category=a, nsfw=True)
                             print(channel)
                             for c in os.listdir('./content/' + b):
                                 await channel.send(file=discord.File('./content/' + b + '/' + c))
@@ -59,10 +56,13 @@ async def on_message(message):
             for a in message.attachments:
                 if a != []:
                     fileDat = requests.get(a.url)
-                    filename = './content/' + message.channel.name + '/' + (date.today().strftime("%Y-%m-%d-%H-%M-%S") if os.path.isfile(a.filename) else a.filename)
-                    with open(filename, 'wb') as savedFile:
+                    filename = '/content/' + message.channel.name + '/' + ((date.today().strftime("%Y-%m-%d-%H-%M-%S") + 
+                                os.path.splitext(a.filename)[1]) if os.path.isfile('./content/' + message.channel.name + '/' + a.filename) else a.filename)
+                    with open('.' + filename, 'wb') as savedFile:
                         savedFile.write(fileDat.content)
                         savedFile.close
-            gc.collect()
-
+                    lbry = requests.post("http://localhost:5279", json={"method": "publish", "params": {"name": a.filename, "bid": "0.005", "file_path": os.path.split(os.path.abspath(__file__))[0]+filename, 
+                                        "validate_file": False, "optimize_file": False, "tags": ['nsfw'], "languages": [], "locations": [], "channel_id": '52ea24026fd792a9dcfe9fef949ed9a778ed0779', "funding_account_ids": [], "preview": False, "blocking": False}}).json()
+                    print(lbry)
+            
 client.run(open('./token.txt', 'r').read())
